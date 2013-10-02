@@ -113,7 +113,8 @@ Exporter = function(doc, props) {
 	this.atlas_maxPng = props.maxPng || 1024;
 	this.atlas_maxSize = props.maxAtlas || 2048;
 	this.dartImports = [
-		'import \'package:stagexl/stagexl.dart\';'
+		'import \'package:stagexl/stagexl.dart\';',
+		'import \'../bluegame.dart\' as base;'
 	];
 	
 	this.docName = extractFileName(doc.name, false);
@@ -384,6 +385,7 @@ p.readStage = function() {
 	var symbol = new ContainerSymbol(this.xml.DOMTimeline[0], true, data);
 	this.setBounds(symbol, ".scene0");
 	symbol.name = this.docSymbolName;
+	symbol.package = 'base';
 	this.symbols.unshift(symbol);
 	this.rootSymbol = symbol;
 	Log.time();
@@ -470,10 +472,19 @@ p.exportMovieClip = function(xml) {
 }
 
 p.addSymbol = function(id, linkage, defaultName, symbol) {
-	if (this.symbolMap[id]) { Log.error("EJS_E_JSXEXPORT","DUPSYMB ("+id+")"); return null; }
-	var name = String(linkage) || extractFileName(id, false, true);
-	symbol.name = getVarName(name, "__DART_LIB", defaultName);
 	
+	if (this.symbolMap[id]) { Log.error("EJS_E_JSXEXPORT","DUPSYMB ("+id+")"); return null; }
+
+	if (linkage.indexOf('base.') == 0) {
+		var n = linkage.split(".");
+		symbol.package = n[0];
+		linkage = n[1];
+	}
+
+	var name = String(linkage) || extractFileName(id, false, true);
+	//Log.warning("id: " + id + ", linkage: " + linkage + ", name: " + name);
+	symbol.name = getVarName(name, "__DART_LIB", defaultName);
+	//Log.warning("name: " + symbol.name);
 	this.symbols.push(symbol);
 	this.symbolMap[id] = symbol;
 	

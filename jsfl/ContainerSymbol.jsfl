@@ -33,6 +33,7 @@ var p = ContainerSymbol.prototype;
 
 p.xml;
 p.name;
+p.package;
 
 p.isStage;
 p.timeline;
@@ -104,11 +105,13 @@ p.toString = function(t) {
 	}
 	Log.time();
 	
+	//Log.warning("symbol, name: " + this.name);
+	
 	// write the definition:
 	if (this.movieclip) {
 		Exporter.instance.hasTweens = true;
 		var str = 
-			 t0+'class '+this.name+' extends MovieClip {\n'
+			 t0+'class '+this.name+' extends ' + (this.package ? this.package + '.' + this.name : 'MovieClip') + ' {\n'
 			+defStr+'\n'
 			+t+this.name+'([String mode, int startPosition, bool loop])\n'
 			+t+'\t\t: super(mode, startPosition, loop, {'+this.labels.join(',')+'}) {\n'
@@ -117,7 +120,7 @@ p.toString = function(t) {
 			+t0+'}\n';
 	} else {
 		var str = 
-			 t0+'class '+this.name+' extends Sprite {\n'
+			 t0+'class '+this.name+' extends ' + (this.package ? this.package + '.' + this.name : 'Sprite') + ' {\n'
 			+defStr+'\n'
 			+t+this.name+'() {\n'
 			+contentStr;
