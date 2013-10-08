@@ -114,7 +114,7 @@ Exporter = function(doc, props) {
 	this.atlas_maxSize = props.maxAtlas || 2048;
 	this.dartImports = [
 		'import \'package:stagexl/stagexl.dart\';',
-		'import \'../bluegame.dart\' as base;'
+		'import \'../darttest.dart\' as base;'
 	];
 	
 	this.docName = extractFileName(doc.name, false);

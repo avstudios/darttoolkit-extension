@@ -115,9 +115,12 @@ p.toString = function(t) {
 			+defStr+'\n'
 			+t+this.name+'([String mode, int startPosition, bool loop])\n'
 			+t+'\t\t: super(mode, startPosition, loop, {'+this.labels.join(',')+'}) {\n'
-			+contentStr
-			+t+'}\n'
-			+t0+'}\n';
+			+contentStr;
+			if (this.package) {
+				str +='\t\tinit();\n';	
+			}
+			str += t+'}\n';
+			str +=t0+'}\n';
 	} else {
 		var str = 
 			 t0+'class '+this.name+' extends ' + (this.package ? this.package + '.' + this.name : 'Sprite') + ' {\n'
@@ -128,7 +131,10 @@ p.toString = function(t) {
 			for(var i=this.names.length-1;i>=0;i--)
 				str += t+'\taddChild('+this.names[i]+');\n'; 
 		}
-		str += actionsStr;
+		str += actionsStr + '\n';
+		if (this.package) {
+			str +='\t\tinit();\n';	
+		}
 		str += t+'}\n'
 			+t0+'}\n';
 	}
