@@ -113,8 +113,7 @@ Exporter = function(doc, props) {
 	this.atlas_maxPng = props.maxPng || 1024;
 	this.atlas_maxSize = props.maxAtlas || 2048;
 	this.dartImports = [
-		'import \'package:stagexl/stagexl.dart\';',
-		'import \'../darttest.dart\' as base;'
+		'import \'package:stagexl/stagexl.dart\';'
 	];
 	
 	this.docName = extractFileName(doc.name, false);
@@ -385,7 +384,7 @@ p.readStage = function() {
 	var symbol = new ContainerSymbol(this.xml.DOMTimeline[0], true, data);
 	this.setBounds(symbol, ".scene0");
 	symbol.name = this.docSymbolName;
-	symbol.package = 'base';
+	symbol.package = 'mollybook';
 	this.symbols.unshift(symbol);
 	this.rootSymbol = symbol;
 	Log.time();
@@ -475,10 +474,14 @@ p.addSymbol = function(id, linkage, defaultName, symbol) {
 	
 	if (this.symbolMap[id]) { Log.error("EJS_E_JSXEXPORT","DUPSYMB ("+id+")"); return null; }
 
-	if (linkage.indexOf('base.') == 0) {
+	var dotIndex = linkage.indexOf('.');
+
+	if (dotIndex > 0) {
 		var n = linkage.split(".");
 		symbol.package = n[0];
 		linkage = n[1];
+
+		this.addImport("import '" + symbol.package + ".dart' as " + symbol.package + ";");
 	}
 
 	var name = String(linkage) || extractFileName(id, false, true);
