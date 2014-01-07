@@ -1,4 +1,4 @@
-﻿/**
+/**
 * Copyright (c) 2013, Adobe Systems Inc.
 * All rights reserved.
 * 
@@ -117,13 +117,25 @@ Exporter = function(doc, props) {
 	];
 	
 	this.docName = extractFileName(doc.name, false);
-	this.docSymbolName = getVarName(doc.docClass||this.docName, "__DART_LIB", "Symbol");
+
+	var docClassName = doc.docClass;
+	if (doc.docClass.indexOf(".") > 0)
+	{
+		var n = doc.docClass.split(".");
+		this.docPackage = n[0];
+		docClassName = n[1];
+
+	}
+
+	this.docSymbolName = getVarName(docClassName||this.docName, "__DART_LIB", "Symbol");
 	this.bitmaps = [];
 	this.sounds = [];
 	this.symbols = [];
 	this.symbolMap = {};
 
 	this.fileChangeManager = new FileChangeManager(CHANGE_LOG_PATH);
+
+
 }
 var p = Exporter.prototype;
 
@@ -161,6 +173,7 @@ p.atlas_maxSize;
 // working data:
 p.docName;
 p.docSymbolName;
+p.docPackage; 
 p.dartImports;
 p.bitmaps;
 p.sounds;
@@ -384,7 +397,7 @@ p.readStage = function() {
 	var symbol = new ContainerSymbol(this.xml.DOMTimeline[0], true, data);
 	this.setBounds(symbol, ".scene0");
 	symbol.name = this.docSymbolName;
-	symbol.package = 'mollybook';
+	symbol.package = this.docPackage;
 	this.symbols.unshift(symbol);
 	this.rootSymbol = symbol;
 	Log.time();
