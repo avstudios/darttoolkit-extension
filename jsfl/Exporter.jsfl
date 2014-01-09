@@ -118,16 +118,14 @@ Exporter = function(doc, props) {
 	
 	this.docName = extractFileName(doc.name, false);
 
-	var docClassName = doc.docClass;
+	var docClass = doc.docClass;
 	if (doc.docClass.indexOf(".") > 0)
 	{
-		var n = doc.docClass.split(".");
-		this.docPackage = n[0];
-		docClassName = n[1];
-
+		this.docBaseClass = doc.docClass;
+		//docClass = doc.docClass[1];
 	}
 
-	this.docSymbolName = getVarName(docClassName||this.docName, "__DART_LIB", "Symbol");
+	this.docSymbolName = getVarName(docClass||this.docName, "__DART_LIB", "Symbol");
 	this.bitmaps = [];
 	this.sounds = [];
 	this.symbols = [];
@@ -173,7 +171,7 @@ p.atlas_maxSize;
 // working data:
 p.docName;
 p.docSymbolName;
-p.docPackage; 
+p.docBaseClass; 
 p.dartImports;
 p.bitmaps;
 p.sounds;
@@ -397,7 +395,7 @@ p.readStage = function() {
 	var symbol = new ContainerSymbol(this.xml.DOMTimeline[0], true, data);
 	this.setBounds(symbol, ".scene0");
 	symbol.name = this.docSymbolName;
-	symbol.package = this.docPackage;
+	symbol.linkageBaseClass = this.docBaseClass;
 	this.symbols.unshift(symbol);
 	this.rootSymbol = symbol;
 	Log.time();
@@ -477,8 +475,7 @@ p.exportMovieClip = function(xml) {
 	var symbol = new ContainerSymbol(xml.DOMTimeline[0], false, data);
 	symbol.read();
 	this.setBounds(symbol, xml.@name);
-	this.addSymbol(xml.@name, xml.@linkageClassName, "Symbol", symbol);
-	
+	this.addSymbol(xml.@name, xml.@linkageClassName, "Symbol", symbol);	
 	Log.time();
 	return symbol;
 }
@@ -486,21 +483,12 @@ p.exportMovieClip = function(xml) {
 p.addSymbol = function(id, linkage, defaultName, symbol) {
 	
 	if (this.symbolMap[id]) { Log.error("EJS_E_JSXEXPORT","DUPSYMB ("+id+")"); return null; }
-
-	var dotIndex = linkage.indexOf('.');
-
-	if (dotIndex > 0) {
-		var n = linkage.split(".");
-		symbol.package = n[0];
-		linkage = n[1];
-
-		this.addImport("import '" + symbol.package + ".dart' as " + symbol.package + ";");
+	if (linkage.indexOf('.') >= 0) // Set base class if linkage contain library name
+	{
+		symbol.linkageBaseClass = linkage;
+		this.addImport("import '" + linkage.split(".")[0] + ".dart' as " + linkage.split(".")[0]  + ";"); // Add new library import	
 	}
-
-	var name = String(linkage) || extractFileName(id, false, true);
-	//Log.warning("id: " + id + ", linkage: " + linkage + ", name: " + name);
-	symbol.name = getVarName(name, "__DART_LIB", defaultName);
-	//Log.warning("name: " + symbol.name);
+	symbol.name = getVarName(extractFileName(id, false, true), "__DART_LIB", defaultName);
 	this.symbols.push(symbol);
 	this.symbolMap[id] = symbol;
 	

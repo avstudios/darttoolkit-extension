@@ -25,15 +25,15 @@ ContainerSymbol = function(xml, isStage, params) {
 	this.xml = xml;
 	this.isStage = isStage;
 	this.params = params;
-	
 	this.duration = xml.@duration*1;
 	this.movieclip = this.duration > 1;
+	this.linkageBaseClass = this.movieclip ? "MovieClip" : "Sprite";
 }
 var p = ContainerSymbol.prototype;
 
 p.xml;
 p.name;
-p.package;
+p.linkageBaseClass;
 
 p.isStage;
 p.timeline;
@@ -105,25 +105,23 @@ p.toString = function(t) {
 	}
 	Log.time();
 	
-	//Log.warning("symbol, name: " + this.name);
-	
 	// write the definition:
 	if (this.movieclip) {
 		Exporter.instance.hasTweens = true;
 		var str = 
-			 t0+'class '+this.name+' extends ' + (this.package ? this.package + '.' + this.name : 'MovieClip') + ' {\n'
+			 t0+'class '+this.name+' extends ' + this.linkageBaseClass + ' {\n'
 			+defStr+'\n'
 			+t+this.name+'([String mode, int startPosition, bool loop])\n'
 			+t+'\t\t: super(mode, startPosition, loop, {'+this.labels.join(',')+'}) {\n'
 			+contentStr;
-			if (this.package) {
+			if (this.linkageBaseClass != "MovieClip" && this.linkageBaseClass != "Sprite") {
 				str +='\t\tinit();\n';	
 			}
 			str += t+'}\n';
 			str +=t0+'}\n';
 	} else {
 		var str = 
-			 t0+'class '+this.name+' extends ' + (this.package ? this.package + '.' + this.name : 'Sprite') + ' {\n'
+			 t0+'class '+this.name+' extends ' + this.linkageBaseClass + ' {\n'
 			+defStr+'\n'
 			+t+this.name+'() {\n'
 			+contentStr;
@@ -132,7 +130,7 @@ p.toString = function(t) {
 				str += t+'\taddChild('+this.names[i]+');\n'; 
 		}
 		str += actionsStr + '\n';
-		if (this.package) {
+		if (this.linkageBaseClass != "MovieClip" && this.linkageBaseClass != "Sprite") {
 			str +='\t\tinit();\n';	
 		}
 		str += t+'}\n'
