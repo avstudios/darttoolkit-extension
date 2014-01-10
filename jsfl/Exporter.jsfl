@@ -483,12 +483,15 @@ p.exportMovieClip = function(xml) {
 p.addSymbol = function(id, linkage, defaultName, symbol) {
 	
 	if (this.symbolMap[id]) { Log.error("EJS_E_JSXEXPORT","DUPSYMB ("+id+")"); return null; }
-	if (linkage.indexOf('.') >= 0) // Set base class if linkage contain library name
+	var name = id;
+	if (id.indexOf('__') >= 0) // Set base class if linkage contain library name
 	{
-		symbol.linkageBaseClass = linkage;
-		this.addImport("import '" + linkage.split(".")[0] + ".dart' as " + linkage.split(".")[0]  + ";"); // Add new library import	
+		var n = id.split("__");
+		name = n[0];
+		symbol.linkageBaseClass = n[1];
+		this.addImport("import '" + n[1].split(".")[0] + ".dart' as " + n[1].split(".")[0]  + ";"); // Add new library import	
 	}
-	symbol.name = getVarName(extractFileName(id, false, true), "__DART_LIB", defaultName);
+	symbol.name = getVarName(extractFileName(name, false, true), "__DART_LIB", defaultName);
 	this.symbols.push(symbol);
 	this.symbolMap[id] = symbol;
 	
